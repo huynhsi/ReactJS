@@ -1,27 +1,58 @@
-import logo from './logo.svg';
-//import './App.css';
+import React, { useState, useEffect } from 'react'
+import Loading from './Loading'
+import Tours from './Tours'
+// ATTENTION!!!!!!!!!!
+// I SWITCHED TO PERMANENT DOMAIN
+const url = 'https://course-api.com/react-tours-project'
 
-import { useState } from 'react';
-import Content from './Content';
-import './login.css';
-
-
-// const gifts = [
-//   'cpu i9',
-//   'Ram 32GB',
-//   'GRB keybord'
-// ]
 function App() {
-  // thuật ngữa mount và unmoount
-  const [show, setShow] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [tours, setTours] = useState([])
 
-  return(
-    <div style={{padding: 20}}>
-      <button onClick={() => setShow(!show)}>Toggle</button>
-      {show && <Content />}
-    </div>
+  const removeTour = (id) => {
+    const newTours = tours.filter((tour) => tour.id !== id)
+    setTours(newTours)
+  }
+
+  const fetchTours = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(url)
+      const tours = await response.json()
+      setLoading(false)
+      setTours(tours)
+    } catch (error) {
+      setLoading(false)
+      console.log(error)
+    }
+  }
+  useEffect(() => {
+    fetchTours()
+  }, [])
+  if (loading) {
+    return (
+      <main>
+        <Loading />
+      </main>
+    )
+  }
+  if (tours.length === 0) {
+    return (
+      <main>
+        <div className='title'>
+          <h2>no tours left</h2>
+          <button className='btn' onClick={() => fetchTours()}>
+            refresh
+          </button>
+        </div>
+      </main>
+    )
+  }
+  return (
+    <main>
+      <Tours tours={tours} removeTour={removeTour} />
+    </main>
   )
-  
 }
 
-export default App;
+export default App
